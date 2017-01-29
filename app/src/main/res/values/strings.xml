@@ -3,4 +3,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="tweetList">Liste des tweets</string>
     <string name="submit">Valider</string>
+    <string name="hashtagSearch">Rechercher par hashtag...</string>
 </resources>

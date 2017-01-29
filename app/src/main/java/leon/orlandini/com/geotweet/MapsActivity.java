@@ -1,71 +1,52 @@
 package leon.orlandini.com.geotweet;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Base64;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Objects;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import leon.orlandini.com.geotweet.classes.Authenticated;
 import leon.orlandini.com.geotweet.classes.Tweet;
@@ -86,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private EditText editText;
     String token;
     String secret;
+    String contenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,9 +99,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         btnTweetList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String contenu = editText.getText().toString();
+                contenu = editText.getText().toString();
                 navigationToTweetList(contenu);
-                //Toast.makeText(getApplicationContext(), editText.getText(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -362,9 +343,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void navigationToTweetList(String contenu){
         Intent intent = new Intent(this, TweetListActivity.class);
 
-        String bilboBaggings = new Gson().toJson(tweets);
+        //String bilboBaggings = new Gson().toJson(tweets);
 
-        Tweets listT = new Tweets(tweets);
+        //Tweets listT = new Tweets(tweets);
 
         //intent.putExtra("tweetList", listT);
         intent.putExtra("contenuTextbox", contenu);
