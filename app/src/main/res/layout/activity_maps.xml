@@ -1,0 +1,56 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="leon.orlandini.com.geotweet.MapsActivity" >
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/txtTitreRecherche"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Recherchez un hashtag"
+        android:gravity="center_horizontal|center_vertical"
+        android:textSize="20sp"
+        android:textColor="#fff"
+        android:background="@color/colorTweeter" />
+
+    <Button
+        android:id="@+id/btnValider"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="35dp"
+        android:text="Valider"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/colorPrimary"
+        android:layout_marginEnd="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="15sp" />
+
+    <EditText
+        android:id="@+id/txtHashtag"
+        android:layout_width="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="35dp"
+        android:ems="12"
+        android:layout_marginStart="10dp"
+        android:inputType="text"
+        android:labelFor="@+id/txtHashtag"
+        android:background="@color/cast_expanded_controller_progress_text_color"
+        android:layout_height="30dp"
+        android:textSize="19sp">
+        <requestFocus/>
+    </EditText>
+</FrameLayout>
+
+
+
