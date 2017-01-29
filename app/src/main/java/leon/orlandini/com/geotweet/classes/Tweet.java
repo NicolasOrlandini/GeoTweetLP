@@ -1,6 +1,9 @@
 package leon.orlandini.com.geotweet.classes;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**

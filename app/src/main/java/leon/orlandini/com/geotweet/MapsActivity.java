@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -68,6 +69,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import leon.orlandini.com.geotweet.classes.Authenticated;
 import leon.orlandini.com.geotweet.classes.Tweet;
+import leon.orlandini.com.geotweet.classes.Tweets;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -81,6 +83,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /// Variables
     private GoogleMap mMap;
     private ArrayList<Tweet> tweets = new ArrayList<>();
+    private EditText editText;
     String token;
     String secret;
 
@@ -97,6 +100,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         token = intent.getExtras().getString("Token");
         secret = intent.getExtras().getString("Secret");
 
+        editText = (EditText) findViewById(R.id.txtHashtag);
+
         Button btnValider = (Button) findViewById(R.id.btnValider);
 
         btnValider.setOnClickListener(new View.OnClickListener() {
@@ -104,6 +109,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 clearMarkers();
                 clearTweets();
                 exectuteGetTweet();
+            }
+        });
+
+        Button btnTweetList = (Button) findViewById(R.id.btnToTweetList);
+
+        btnTweetList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String contenu = editText.getText().toString();
+                navigationToTweetList(contenu);
+                //Toast.makeText(getApplicationContext(), editText.getText(), Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -121,7 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         uiSettings.setZoomControlsEnabled(true);
         /// Bouton de zoom et dezoom activé
         uiSettings.setIndoorLevelPickerEnabled(true);
-        /// Acvtiation de la boussole
+        /// Activation de la boussole
         uiSettings.setCompassEnabled(true);
         /// La toolbar est désactivé
         uiSettings.setMapToolbarEnabled(false);
@@ -341,5 +357,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                 .visible(true)
                 .snippet(tweet.getMessage()));
+    }
+
+    public void navigationToTweetList(String contenu){
+        Intent intent = new Intent(this, TweetListActivity.class);
+
+        String bilboBaggings = new Gson().toJson(tweets);
+
+        Tweets listT = new Tweets(tweets);
+
+        //intent.putExtra("tweetList", listT);
+        intent.putExtra("contenuTextbox", contenu);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

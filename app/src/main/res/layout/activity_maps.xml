@@ -22,20 +22,6 @@
         android:textColor="#fff"
         android:background="@color/colorTweeter" />
 
-    <Button
-        android:id="@+id/btnValider"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="35dp"
-        android:text="Valider"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:background="@color/colorPrimary"
-        android:layout_marginEnd="10dp"
-        android:textColor="@android:color/white"
-        android:textSize="15sp" />
-
     <EditText
         android:id="@+id/txtHashtag"
         android:layout_width="wrap_content"
@@ -50,6 +36,34 @@
         android:textSize="19sp">
         <requestFocus/>
     </EditText>
+
+    <Button
+        android:id="@+id/btnValider"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="35dp"
+        android:text="@string/submit"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/colorPrimary"
+        android:layout_marginEnd="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="15sp" />
+
+    <Button
+        android:id="@+id/btnToTweetList"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="75dp"
+        android:text="@string/tweetList"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@color/colorPrimary"
+        android:layout_marginEnd="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="15sp" />
 </FrameLayout>
 
 
