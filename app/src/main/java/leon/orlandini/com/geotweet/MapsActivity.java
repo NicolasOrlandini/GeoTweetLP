@@ -96,7 +96,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         token = intent.getExtras().getString("Token");
         secret = intent.getExtras().getString("Secret");
-        
+
         Button btnValider = (Button) findViewById(R.id.btnValider);
 
         btnValider.setOnClickListener(new View.OnClickListener() {
@@ -254,7 +254,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             // construct a normal HTTPS request and include an Authorization
             // header with the value of Bearer <>
-            httpGet.setHeader("Authorization", "Bearer " + token);
+            httpGet.setHeader("Authorization", "Bearer " + auth.getAccess_token());
             httpGet.setHeader("Content-Type", "application/json");
             // update the results with the body of the response
             results = getResponseBody(httpGet);
