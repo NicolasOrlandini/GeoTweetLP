@@ -7,6 +7,8 @@ import android.widget.Toast;
 
 import com.twitter.sdk.android.tweetui.SearchTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
+import com.twitter.sdk.android.tweetui.UserTimeline;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -24,15 +26,20 @@ public class TweetListActivity extends ListActivity {
         String contenuTextbox = intent.getExtras().getString("contenuTextbox"); //on get le hashtag depuis l'activity
         //Toast.makeText(getApplicationContext(), contenuTextbox, Toast.LENGTH_LONG).show();
 
-        //on récupère les derniers tweets
+        //on récupère les derniers tweets via le hashtag
         final SearchTimeline timeline = new SearchTimeline.Builder()
                 .query("#" + contenuTextbox)
                 .untilDate(new Date()) // depuis la date du jour
                 .build();
 
+        //on récupère les tweets via le username
+        final UserTimeline userTimeline = new UserTimeline.Builder()
+                .screenName("SinguFuret")
+                .build();
+
         //on ajout dans la listview
         final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(this)
-                .setTimeline(timeline)
+                .setTimeline(userTimeline)
                 .build();
         setListAdapter(adapter);
 
