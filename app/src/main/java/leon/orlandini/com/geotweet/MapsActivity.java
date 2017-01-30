@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.util.Base64;
 import android.util.Log;
@@ -27,7 +28,6 @@ import com.google.gson.Gson;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -42,7 +42,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -50,7 +49,6 @@ import java.util.Objects;
 
 import leon.orlandini.com.geotweet.classes.Authenticated;
 import leon.orlandini.com.geotweet.classes.Tweet;
-import leon.orlandini.com.geotweet.classes.Tweets;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -65,9 +63,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private ArrayList<Tweet> tweets = new ArrayList<>();
     private EditText editText;
-    String token;
-    String secret;
-    String contenu;
+    private String token;
+    private String secret;
+    private String contenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +101,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 navigationToTweetList(contenu);
             }
         });
+
+        if (android.os.Build.VERSION.SDK_INT > 9)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+        }
+
     }
 
     @Override
@@ -149,15 +154,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     * Récupération de l'image de profil correspondant au tweet
+     * @param username nom d'utilisateur pour lequel l'image doit être récupéré
+     * @return retourne le Drawable créé à partir de l'image
+     */
     public Drawable chargerImageProfil(String username) {
-
+        Log.e("nbTweets", String.valueOf(tweets.size()));
         for (Tweet tweet:tweets ) {
             if (Objects.equals(tweet.getUsername(), username)){
                 try {
                     InputStream is = (InputStream) new URL(tweet.getImage_url()).getContent();
 
+                    Log.e("ImageURL", tweet.getImage_url());
                     return Drawable.createFromStream(is, tweet.getUsername());
                 } catch (Exception e) {
+                    Log.e("ImageURL", "Impossible de télécharger l'image", e);
                     return null;
                 }
             }
@@ -165,6 +177,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
+    /**
+     * Exécution de la tâche asynchrone de récupération des tweets
+     */
     public void exectuteGetTweet()
     {
         MyTask task = new MyTask();
@@ -175,10 +190,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         task.execute();
     }
 
+    /**
+     * Suppression des marqueurs de la map
+     */
     private void clearMarkers() {
         mMap.clear();
     }
 
+    /**
+     * Clean de la liste de tweets
+     */
     private void clearTweets() {
         tweets.clear();
     }
@@ -219,81 +240,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    // Fetches the first tweet from a given user's timeline
-    private void getTweets(String endPointUrl) throws IOException, JSONException, IllegalStateException {
+    /**
+     * Récupération de la liste des tweets ayant une localisation
+     * @param url url de récupération des tweets
+     * @throws IOException
+     * @throws JSONException
+     * @throws IllegalStateException
+     */
+    private void getTweets(String url) throws IOException, JSONException, IllegalStateException {
 
-        String results;
-        // URL encode the consumer key and secret
+        String resultat;
+
+        /// Authentification
+        Authenticated auth = authentifier();
+
+        /// Vérification du token
+        if (auth != null && auth.getToken_type().equals("bearer")) {
+
+            /// Création d'une requête
+            HttpGet httpGet = new HttpGet(url);
+
+            /// Construction de la requête et ajout du bearer token dans le header
+            httpGet.setHeader("Authorization", "Bearer " + auth.getAccess_token());
+            httpGet.setHeader("Content-Type", "application/json");
+
+            /// Récupération du résultat
+            resultat = getResponseBody(httpGet);
+
+            Log.e("Resultat", resultat);
+
+            parseTweets(resultat);
+        }
+    }
+
+    /**
+     * Athentification Facebook
+     * @return objet Authenticated
+     * @throws IOException exception
+     */
+    private Authenticated authentifier() throws IOException {
+        // URL encode the consumer key et secret
         String urlApiKey = URLEncoder.encode(TWITTER_KEY, "UTF-8");
         String urlApiSecret = URLEncoder.encode(TWITTER_SECRET, "UTF-8");
 
-        // Concatenate the encoded consumer key, a colon character, and the
-        // encoded consumer secret
+        /// Concaténation de la consumer key et de la secret
         String combined = urlApiKey + ":" + urlApiSecret;
 
-        // Base64 encode the string
+        /// Conversion des clés en 64 bits
         String base64Encoded = Base64.encodeToString(combined.getBytes(), Base64.NO_WRAP);
 
-        // Step 2: Obtain a bearer token
+        /// Requete POST, obtention du bearer token
         HttpPost httpPost = new HttpPost(TWEETER_TOKEN_URL);
         httpPost.setHeader("Authorization", "Basic " + base64Encoded);
         httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
         httpPost.setEntity(new StringEntity("grant_type=client_credentials"));
         String rawAuthorization = getResponseBody(httpPost);
-        Authenticated auth = jsonToAuthenticated(rawAuthorization);
-
-        // Applications should verify that the value associated with the
-        // token_type key of the returned object is bearer
-        if (auth != null && auth.getToken_type().equals("bearer")) {
-
-            // Step 3: Authenticate API requests with bearer token
-            HttpGet httpGet = new HttpGet(endPointUrl);
-
-            // construct a normal HTTPS request and include an Authorization
-            // header with the value of Bearer <>
-            httpGet.setHeader("Authorization", "Bearer " + auth.getAccess_token());
-            httpGet.setHeader("Content-Type", "application/json");
-            // update the results with the body of the response
-            results = getResponseBody(httpGet);
-
-            Log.e("Resultat", results);
-
-            try{
-                JSONObject root = new JSONObject(results);
-                JSONArray sessions = root.getJSONArray("statuses");
-                for (int i = 0; i < sessions.length(); i++) {
-                    JSONObject session = sessions.getJSONObject(i);
-
-                    String message = session.getString("text");
-                    String username  = session.getJSONObject("user").getString("screen_name");
-
-                    String image_url = session.getJSONObject("user").getString("profile_image_url");
-
-                    if(!sessions.getJSONObject(i).isNull("geo")){
-                        JSONObject point = sessions.getJSONObject(i).getJSONObject("geo");
-
-                        double latitude   = point.getJSONArray("coordinates").getDouble(0);
-                        double longitude = point.getJSONArray("coordinates").getDouble(1);
-
-                        LatLng location = new LatLng(latitude, longitude);
-
-                        Log.e("Position", "Latitude : " + location.latitude + "/Longitude : " + location.longitude);
-
-                        Tweet tweet = new Tweet(username, message, image_url);
-                        tweet.setPosition(location);
-                        Log.e("Position du tweet ", "Latitude : " + tweet.getPosition().latitude + "/Longitude : " + tweet.getPosition().longitude);
-                        tweets.add(tweet);
-                    }
-                }
-            }
-            catch (Exception ex) {
-                Log.e("JsonError","Erreur de parse du JSON !",ex);
-
-            }
-        }
+        return jsonToAuthenticated(rawAuthorization);
     }
 
-    private String getResponseBody(HttpRequestBase request) throws UnsupportedEncodingException, ClientProtocolException, IOException {
+
+    /**
+     * Récupération du corp de la réponse
+     * @param request requête http
+     * @return résultat
+     * @throws IOException exception
+     */
+    private String getResponseBody(HttpRequestBase request) throws  IOException {
         StringBuilder sb = new StringBuilder();
 
         DefaultHttpClient httpClient = new DefaultHttpClient(new BasicHttpParams());
@@ -317,6 +329,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return sb.toString();
     }
 
+
+    /**
+     * Parse Ahthentification
+     * @param rawAuthorization
+     * @return objet Authenticated
+     */
     private Authenticated jsonToAuthenticated(String rawAuthorization) {
         Authenticated auth = null;
         if (rawAuthorization != null && rawAuthorization.length() > 0) {
@@ -330,6 +348,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return auth;
     }
 
+    /**
+     * Parse du Json contenant les tweets
+     * @param resultat
+     */
+    private void parseTweets(String resultat){
+        try{
+            JSONObject root = new JSONObject(resultat);
+            JSONArray sessions = root.getJSONArray("statuses");
+
+            for (int i = 0; i < sessions.length(); i++) {
+                JSONObject session = sessions.getJSONObject(i);
+
+                String message = session.getString("text");
+                String username  = session.getJSONObject("user").getString("screen_name");
+
+                String image_url = session.getJSONObject("user").getString("profile_image_url");
+
+                if(!sessions.getJSONObject(i).isNull("geo")){
+                    JSONObject point = sessions.getJSONObject(i).getJSONObject("geo");
+
+                    double latitude   = point.getJSONArray("coordinates").getDouble(0);
+                    double longitude = point.getJSONArray("coordinates").getDouble(1);
+
+                    LatLng location = new LatLng(latitude, longitude);
+
+                    Log.e("Position", "Latitude : " + location.latitude + "/Longitude : " + location.longitude);
+
+                    Tweet tweet = new Tweet(username, message, image_url);
+                    tweet.setPosition(location);
+                    Log.e("Position du tweet ", "Latitude : " + tweet.getPosition().latitude + "/Longitude : " + tweet.getPosition().longitude);
+                    tweets.add(tweet);
+                }
+            }
+        }
+        catch (Exception ex) {
+            Log.e("JsonError","Erreur de parse du JSON !",ex);
+        }
+    }
+
+    /**
+     * Ajout de marqueur
+     * @param tweet Tweet
+     */
     public void addMarker(Tweet tweet){
 
         mMap.addMarker(new MarkerOptions()
@@ -344,8 +405,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = new Intent(this, TweetListActivity.class);
 
         //String bilboBaggings = new Gson().toJson(tweets);
-
-        //Tweets listT = new Tweets(tweets);
 
         //intent.putExtra("tweetList", listT);
         intent.putExtra("contenuTextbox", contenu);

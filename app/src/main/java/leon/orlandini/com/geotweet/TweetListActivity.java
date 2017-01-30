@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.tweetui.SearchTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 import com.twitter.sdk.android.tweetui.UserTimeline;
@@ -12,6 +13,7 @@ import com.twitter.sdk.android.tweetui.UserTimeline;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import leon.orlandini.com.geotweet.classes.Tweet;
 
@@ -39,7 +41,7 @@ public class TweetListActivity extends ListActivity {
 
         //on ajout dans la listview
         final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(this)
-                .setTimeline(userTimeline)
+                .setTimeline(timeline)
                 .build();
         setListAdapter(adapter);
 
